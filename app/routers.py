@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Header, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
@@ -64,11 +64,13 @@ def get_user_links(session: Session = Depends(get_db),
 
 
 @redirect_router.get("/{short_id}", tags=['Shorten'])
-def redirect_original_url(short_id: str, 
+async def redirect_original_url(short_id: str, 
                           request: Request,
                           session: Session = Depends(get_db)):
-    db_link = crud.get_link_by_short_id(session, short_id)
-    if not db_link:
+    
+    result = await utils.check_redis_cache(session, short_id)
+    if not result:
         raise HTTPException(status_code=404, detail="Not found")
-    crud.create_visitor(session, db_link.id, request)
-    return RedirectResponse(url=db_link.original_url)
+    
+    crud.create_visitor(session, int(result["link_id"]), request)
+    return RedirectResponse(url=result["url"])
