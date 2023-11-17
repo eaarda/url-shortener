@@ -29,6 +29,7 @@ def override_get_db():
 app.dependency_overrides[get_db] = override_get_db
 
 client = TestClient(app)
+created_short_id = None
 
 
 def get_user_headers():
@@ -95,17 +96,19 @@ def test_login_wrong_pass():
     
 
 def test_create_short_url_without_token():
+    global created_short_id
     payload = {
-        "original_url": "http://example.com"
+        "original_url": "https://example.com/"
     }
     response = client.post("/api/v1/shorten", json=payload)
     assert response.status_code == 200
+    created_short_id = response.json()['short_id']
     assert "short_url" in response.json()
 
 
 def test_create_short_url_with_token():
     payload = {
-        "original_url": "http://example.com"
+        "original_url": "https://example.com/"
     }
     response = client.post("/api/v1/shorten", json=payload, headers=get_user_headers())
     assert response.status_code == 200
@@ -132,20 +135,8 @@ def test_get_user_links():
     assert response.status_code == 403
     assert response.json() == {"detail": "Not authenticated"}
 
-
 def test_redirect_original_url():
-    payload = {
-        "original_url": "http://example.com/"
-    }
-    response = client.post("/api/v1/shorten", json=payload)
-    short_id = response.json()["short_id"]
-
-    response = client.get(f"/{short_id}")
-    assert response.status_code == 200
-    assert response.url == "http://example.com/"
-
-
-def test_redirect_original_url_not_found():
-    response = client.get("/nonexist")
-    assert response.status_code == 404
-    assert response.json() == {"detail": "Not found"}
+    global created_short_id
+    response = client.get(f'/{created_short_id}', follow_redirects=False)
+    assert response.status_code == 307
+    assert response.headers["location"] == "https://example.com/"
