@@ -20,6 +20,8 @@ URL Shortener is a powerful tool designed to simplify and enhance the management
 
 **Database:** PostgreSQL
 
+**Caching:** Redis
+
 ## Run Locally
 Follow these steps to set up the project:
 
