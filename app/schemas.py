@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, EmailStr, field_validator, HttpUrl, AfterValidator, validator, model_validator
+from pydantic import BaseModel, Field, EmailStr, field_validator, HttpUrl, AfterValidator, model_validator
 from typing_extensions import Annotated
 from datetime import datetime
 

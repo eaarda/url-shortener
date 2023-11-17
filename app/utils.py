@@ -1,5 +1,5 @@
 import base64, hashlib, re
-from fastapi import Depends, HTTPException, status
+from fastapi import HTTPException, status
 from datetime import datetime, timezone
 
 

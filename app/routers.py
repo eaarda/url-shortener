@@ -29,10 +29,7 @@ def register(payload: schemas.UserCreate, session: Session = Depends(get_db)):
 @router.post('/login', summary="Login", tags=['Auth'])
 def login(payload: schemas.UserLogin, session: Session = Depends(get_db)):
     db_user = crud.get_user_by_username(session, payload.username)
-    if not db_user:
-        raise HTTPException(status_code=400, detail="Invalid credentials")
-    
-    if not auth_handler.verify_password(payload.password, db_user.hashed_password):
+    if not db_user or not auth_handler.verify_password(payload.password, db_user.hashed_password):
         raise HTTPException(status_code=400, detail="Invalid credentials")
     
     access_token = auth_handler.encode_token(db_user)
